@@ -1,0 +1,33 @@
+name: Caching Dependencies Demo
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache npm dependencies
+      uses: actions/cache@v4
+      id: cache-npm # Give the step an ID to reference its output
+      with:
+        # The path to cache: node_modules directory
+        path: node_modules
+        # The specific key for this cache
+        key: cache-a59d46f
+
+    - name: prime-cache-a59d46f
+      # Use the output of the cache step to see if it was a hit or miss
+      run: echo "The cache-hit output was: ${{ steps.cache-npm.outputs.cache-hit }}"
+
+    - name: Install dependencies
+      # The 'if' condition ensures this step only runs on a cache miss
+      # On a cache hit, the 'node_modules' folder is already restored
+      if: steps.cache-npm.outputs.cache-hit != 'true'
+      run: npm install
